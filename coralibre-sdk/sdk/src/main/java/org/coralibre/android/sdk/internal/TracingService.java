@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -34,7 +35,6 @@ import org.coralibre.android.sdk.internal.bluetooth.BleClient;
 import org.coralibre.android.sdk.internal.bluetooth.BleServer;
 import org.coralibre.android.sdk.internal.bluetooth.BluetoothServiceStatus;
 import org.coralibre.android.sdk.internal.bluetooth.BluetoothState;
-import org.coralibre.android.sdk.internal.logger.Logger;
 
 public class TracingService extends Service {
 
@@ -70,7 +70,7 @@ public class TracingService extends Service {
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
                 if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_ON) {
-                    Logger.w(TAG, BluetoothAdapter.ACTION_STATE_CHANGED);
+                    Log.w(TAG, BluetoothAdapter.ACTION_STATE_CHANGED);
                     BluetoothServiceStatus.resetInstance();
                     BroadcastHelper.sendErrorUpdateBroadcast(context);
                 }
@@ -82,7 +82,7 @@ public class TracingService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (LocationManager.MODE_CHANGED_ACTION.equals(intent.getAction())) {
-                Logger.w(TAG, LocationManager.MODE_CHANGED_ACTION);
+                Log.w(TAG, LocationManager.MODE_CHANGED_ACTION);
                 BroadcastHelper.sendErrorUpdateBroadcast(context);
             }
         }
@@ -108,6 +108,7 @@ public class TracingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d(TAG, "onCreate()");
 
         isFinishing = false;
 
@@ -124,6 +125,7 @@ public class TracingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null || intent.getAction() == null) {
+            Log.e(TAG, "Service called but without action or intent");
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -140,7 +142,7 @@ public class TracingService extends Service {
             wl.acquire();
         }
 
-        Logger.i(TAG, "onStartCommand() with " + intent.getAction());
+        Log.i(TAG, "onStartCommand() with " + intent.getAction());
 
         startAdvertising = intent.getBooleanExtra(EXTRA_ADVERTISE, true);
         startReceiving = intent.getBooleanExtra(EXTRA_RECEIVE, true);
@@ -252,7 +254,7 @@ public class TracingService extends Service {
     private void restartClient() {
         BluetoothState bluetoothState = startClient();
         if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
-            Logger.e(TAG, "bluetooth not supported");
+            Log.e(TAG, "bluetooth not supported");
             return;
         }
 
@@ -265,7 +267,7 @@ public class TracingService extends Service {
     private void restartServer() {
         BluetoothState bluetoothState = startServer();
         if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
-            Logger.e(TAG, "bluetooth not supported");
+            Log.e(TAG, "bluetooth not supported");
             return;
         }
 
@@ -313,7 +315,7 @@ public class TracingService extends Service {
         if (startAdvertising) {
             bleServer = new BleServer(this);
 
-            Logger.d(TAG, "startAdvertising");
+            Log.d(TAG, "startAdvertising");
             return bleServer.startAdvertising();
         }
         return null;
@@ -356,7 +358,7 @@ public class TracingService extends Service {
 
     @Override
     public void onDestroy() {
-        Logger.i(TAG, "onDestroy()");
+        Log.i(TAG, "onDestroy()");
 
         unregisterReceiver(errorsUpdateReceiver);
         unregisterReceiver(bluetoothStateChangeReceiver);

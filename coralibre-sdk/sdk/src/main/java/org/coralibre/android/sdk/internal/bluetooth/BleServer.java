@@ -19,6 +19,7 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
+import android.util.Log;
 
 
 import java.util.UUID;
@@ -26,7 +27,6 @@ import java.util.UUID;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
-import org.coralibre.android.sdk.internal.logger.Logger;
 
 import static android.bluetooth.le.AdvertisingSetParameters.INTERVAL_MEDIUM;
 import static android.bluetooth.le.AdvertisingSetParameters.TX_POWER_LOW;
@@ -48,10 +48,10 @@ public class BleServer {
 		public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {
 			super.onAdvertisingSetStarted(advertisingSet, txPower, status);
 			if(status == ADVERTISE_SUCCESS) {
-				Logger.i(TAG, "advertise onStartSuccess: " + advertisingSet.toString());
+				Log.i(TAG, "advertise onStartSuccess: " + advertisingSet.toString());
 				BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(BluetoothServiceStatus.ADVERTISE_OK);
 			} else {
-				Logger.e(TAG, "advertise onStartFailure: " + status);
+				Log.e(TAG, "advertise onStartFailure: " + status);
 				BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(status);
 			}
 		}
@@ -116,7 +116,7 @@ public class BleServer {
 				.build();
 
 		mLeAdvertiser.startAdvertisingSet(advParameters, advData, null, null, null, advertisingSetCallback);
-		Logger.d(TAG, "started advertising (only advertiseData), powerLevel "
+		Log.d(TAG, "started advertising (only advertiseData), powerLevel "
 				+ advParameters.getTxPowerLevel());
 
 		return BluetoothState.ENABLED;
